@@ -1913,7 +1913,7 @@ print "-----------------"
 #Camera.takeRaspiStill("Startup",pwm, -60, -20)
 Camera.takeAndSendPicture("Startup", pwm, 300, 550)
 
-turnOnOLED()
+
 
 if (config.SunAirPlus_Present == False):
 

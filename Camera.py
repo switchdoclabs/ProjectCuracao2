@@ -135,7 +135,7 @@ def  takeRaspiStill(source, pwm, pan, tilt):
 
 def takeAndSendPicture(source, pwm, pan, tilt):
 	try:
-        	takeRaspiStill("Startup",pwm, 300, 550)
+        	takeRaspiStill(source,pwm, 300, 550)
         	sendemail.sendEmail("TestPicture", "Project Curacao2 Picture \n", "Project Curacao2 has sent a picture.", config.notifyAddress,  config.fromAddress, "static/picamera.jpg");
 	except:
         	print "Camera Failed"

@@ -164,11 +164,12 @@ def setWiFiOn(reason):
 
 def setWiFiOff(reason):
 
-        f = open("//home/pi/SDL_Pi_ProjectCuracao2/WIFISHUTOFF,"r")
+        f = open("/home/pi/SDL_Pi_ProjectCuracao2/WIFISHUTOFF","r")
         command = f.read()
         f.close()
-
-        if (command == "False") 
+	command = command.replace("\n", "")
+	print "command='%s'"% command
+        if (command == "False"): 
    		pclogging.log(pclogging.INFO, __name__, "Power: %s WiFi !: %s DISABLED" % (reason,"OFF"))
                 # Nothing to do
                 return 
