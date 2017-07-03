@@ -486,7 +486,7 @@ def process_as3935_interrupt():
 	as3935LastDistance = distance
 	as3935LastStatus = "Lightning Detected "  + str(distance) + "km away. (%s)" % now
 	pclogging.log(pclogging.INFO, __name__, "Lightning Detected "  + str(distance) + "km away. (%s)" % now)
-	#sendemail.sendEmail("test", "ProjectCuracao2 Lightning Detected\n", as3935LastStatus, config.textnotifyAddress,  config.fromAddress, "");
+	sendemail.sendEmail("test", "ProjectCuracao2 Lightning Detected\n", as3935LastStatus, config.textnotifyAddress,  config.fromAddress, "");
     
     print "Last Interrupt = 0x%x:  %s" % (as3935LastInterrupt, as3935LastStatus)
     if (config.TCA9545_I2CMux_Present):
@@ -1114,7 +1114,7 @@ def sampleSunAirPlus():
 
 
 		print "----------------- "
-		print " SunAirPlus Sampling" 
+		print " SunControl Sampling" 
 		print "----------------- "
 		#
 	
@@ -1143,10 +1143,14 @@ def sampleSunAirPlus():
 
 		batteryCharge = returnPercentLeftInBattery(batteryVoltage, 4.19)	
 
+		Camera.batteryVoltage = batteryVoltage
+		Camera.batteryCurrent = batteryCurrent
+		Camera.solarVoltage  = solarVoltage
+		Camera.solarCurrent = solarCurrent
 	else:
 	
 		print "----------------- "
-		print " SunAirPlus Not Present" 
+		print " SunControl Not Present" 
 		print "----------------- "
 
 def sampleAndDisplay():
@@ -1438,7 +1442,7 @@ def sampleAndDisplay():
 		print "----------------- "
 		print "----------------- "
 		print "----------------- "
-		print "SunAirPlus Currents / Voltage "
+		print "SunControl Currents / Voltage "
 		print "----------------- "
         	shuntvoltage1 = 0
         	busvoltage1   = 0
@@ -1613,11 +1617,15 @@ def patTheDog():
 def shutdownPi(why):
 
    pclogging.log(pclogging.INFO, __name__, "Pi Shutting Down: %s" % why)
-   sendemail.sendEmail("test", "ProjectCuracao2 Shutting down:"+ why, "The ProjectCuracao2 Raspberry Pi shutting down.", config.notifyAddress,  config.fromAddress, "");
+   try:
+	sendemail.sendEmail("test", "ProjectCuracao2 Shutting down:"+ why, "The ProjectCuracao2 Raspberry Pi shutting down.", config.notifyAddress,  config.fromAddress, "");
+   except:
+	print "sendmail fail"
+
    sys.stdout.flush()
    time.sleep(10.0)
 
-   #os.system("sudo shutdown -h now")
+   os.system("sudo shutdown -h now")
 
 def rebootPi(why):
 
@@ -1831,6 +1839,22 @@ currentWindDirection = 0
 currentWindDirectionVoltage = 0.0
 rain60Minutes = 0.0
 
+#
+batteryVoltage=0
+batteryCurrent=0 
+solarVoltage=0 
+solarCurrent=0 
+loadVoltage=0 
+loadCurrent=0
+
+
+batteryPower=0 
+solarPower=0 
+loadPower=0 
+batteryCharge=0
+
+
+
 pclogging.log(pclogging.INFO, __name__, "ProjectCuracao2 Startup Version 3.0")
 
 subjectText = "The ProjectCuracao2 Raspberry Pi has #rebooted."
@@ -1840,6 +1864,25 @@ if (config.SunAirPlus_Present):
 	bodyText = bodyText + "\n" + "BV=%0.2fV/BC=%0.2fmA/SV=%0.2fV/SC=%0.2fmA" % (batteryVoltage, batteryCurrent, solarVoltage, solarCurrent)
 
 sendemail.sendEmail("test", bodyText, subjectText ,config.notifyAddress,  config.fromAddress, "");
+
+if (config.SunAirPlus_Present == False):
+
+        	batteryCurrent = 0.0
+        	batteryVoltage = 4.00 
+		batteryPower = batteryVoltage * (batteryCurrent/1000)
+
+
+        	solarCurrent = 0.0 
+        	solarVoltage = 0.0 
+		solarPower = solarVoltage * (solarCurrent/1000)
+
+        	loadCurrent = 0.0
+        	loadVoltage = 0.0 
+		loadPower = loadVoltage * (loadCurrent/1000)
+
+		batteryCharge = 0 
+
+sampleSunAirPlus()
 
 # Set up scheduler
 
@@ -1881,14 +1924,14 @@ scheduler.add_job(WLAN_check, 'interval', seconds=30*60)
 #scheduler.add_job(rebootPi, 'cron', day='2-30/2', hour=0, minute=4, args=["48 Hour Reboot"]) 
 	
 # send a picture an hour
-scheduler.add_job(Camera.takeAndSendPicture, 'cron', minute=5, second=10, args=["Hour Pic", pwm, 300, 550]) 
+scheduler.add_job(Camera.takeAndSendPicture, 'cron', minute=3, second=10, args=["Hour Pic", pwm, 300, 550 ]) 
 
 # every 1 minute, print out Power Status
 
 scheduler.add_job(printPowerState, 'interval', seconds=60 ) 
 
 # schedule WiFi On and Off
-scheduler.add_job(powercontrol.setWiFiOn, 'cron',  minute=50, args=["Scheduled WiFi On"]) 
+scheduler.add_job(powercontrol.setWiFiOn, 'cron',  minute=55, args=["Scheduled WiFi On"]) 
 scheduler.add_job(powercontrol.setWiFiOff, 'cron',  minute=10, args=["Scheduled WiFi Off"]) 
 
 
@@ -1911,26 +1954,13 @@ print "-----------------"
 #camera.close() 
 
 #Camera.takeRaspiStill("Startup",pwm, -60, -20)
-Camera.takeAndSendPicture("Startup", pwm, 300, 550)
+Camera.takeAndSendPicture("Startup", pwm, 300, 550 ) 
 
 
 
-if (config.SunAirPlus_Present == False):
 
-        	batteryCurrent = 0.0
-        	batteryVoltage = 4.00 
-		batteryPower = batteryVoltage * (batteryCurrent/1000)
-
-
-        	solarCurrent = 0.0 
-        	solarVoltage = 0.0 
-		solarPower = solarVoltage * (solarCurrent/1000)
-
-        	loadCurrent = 0.0
-        	loadVoltage = 0.0 
-		loadPower = loadVoltage * (loadCurrent/1000)
-
-		batteryCharge = 0 
+#Camera.takeRaspiStill("Startup",pwm, -60, -20)
+#Camera.takeAndSendPicture("Startup", pwm, 300, 550 ) 
 
 #  Main Loop
 

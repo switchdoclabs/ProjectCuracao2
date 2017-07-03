@@ -18,6 +18,10 @@ import datetime
 import random
 import subprocess
 
+
+
+
+
 # Check for user imports
 try:
         import conflocal as config
@@ -28,6 +32,12 @@ except ImportError:
 import sendemail
 
 import pclogging
+
+
+batteryVoltage =0
+batteryCurrent =0
+solarVoltage  =0
+solarCurrent =0
 
 def setTiltServo(pwm,value):
         servoMin = 150  # Min pulse length out of 4096
@@ -104,16 +114,16 @@ def  takeRaspiStill(source, pwm, pan, tilt):
 	time.sleep(1.0)
 
 
-        #try:
-	#         f = open("/home/pi/ProjectCuracao/main/state/exposure.txt", "r")
-	#         tempString = f.read()
-	#         f.close()
-	#         lowername = tempString
+        try:
+	         f = open("/home/pi/SDL_Pi_ProjectCuracao2/state/exposure.txt", "r")
+	         tempString = f.read()
+	         f.close()
+	         lowername = tempString
 
-        #except IOError as e:
-	#	 lowername = "auto"
+        except IOError as e:
+		 lowername = "auto"
 
-	lowername = "auto"
+	#lowername = "auto"
 	#filename = "/home/pi/RasPiConnectServer/static/picameraraw.jpg" 
 	filename = "/home/pi/SDL_Pi_ProjectCuracao2/static/picameraraw.jpg" 
 	filenameout = "/home/pi/SDL_Pi_ProjectCuracao2/static/picamera.jpg" 
@@ -130,14 +140,18 @@ def  takeRaspiStill(source, pwm, pan, tilt):
         shutOffPanTilt(pwm)
 
 	print "finished taking picture"
-	return
+	return lowername
 
 
-def takeAndSendPicture(source, pwm, pan, tilt):
-	try:
-        	takeRaspiStill(source,pwm, 300, 550)
-        	sendemail.sendEmail("TestPicture", "Project Curacao2 Picture \n", "Project Curacao2 has sent a picture.", config.notifyAddress,  config.fromAddress, "static/picamera.jpg");
-	except:
-        	print "Camera Failed"
+def takeAndSendPicture(source, pwm, pan, tilt ):
+	
+	#try:
+       	exposure = takeRaspiStill(source,pwm, 300, 550)
+		
+       	bodyText =  "\n" + "BV=%0.2fV/BC=%0.2fmA/SV=%0.2fV/SC=%0.2fmA/%s" % (batteryVoltage, batteryCurrent, solarVoltage, solarCurrent,exposure)
+
+	sendemail.sendEmail("TestPicture", bodyText, "Project Curacao2 Picture \n", config.notifyAddress,  config.fromAddress, "static/picamera.jpg")
+	#except:
+       	#print "Camera Failed"
 
 	return

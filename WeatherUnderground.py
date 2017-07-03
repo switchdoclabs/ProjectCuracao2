@@ -44,7 +44,7 @@ def sendWeatherUndergroundData( as3935LightningCount, as3935, as3935LastInterrup
 	myURL += "&indoortempf=%0.2f" % ((HTUtemperature*9.0/5.0)+32.0)
 	myURL += "&indoorhumidity%0.2f=" % HTUhumidity
 
-	myURL += "&software=GroveWeatherPi"
+	myURL += "&software=ProjectCuracao2"
 	
 
 
