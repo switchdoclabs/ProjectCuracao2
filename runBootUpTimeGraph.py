@@ -12,8 +12,8 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 
 
-import TemperatureHumidityGraph 
+import BootUpTimeGraph 
 
 
-TemperatureHumidityGraph.TemperatureHumidityGraph('test', 10, 0)
+BootUpTimeGraph.BootUpTimeGraph('test', 10, 0)
 
