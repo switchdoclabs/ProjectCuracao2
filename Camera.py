@@ -146,7 +146,7 @@ def  takeRaspiStill(source, pwm, pan, tilt):
 def takeAndSendPicture(source, pwm, pan, tilt ):
 	
 	#try:
-       	exposure = takeRaspiStill(source,pwm, 300, 550)
+       	exposure = takeRaspiStill(source,pwm, pan, tilt)
 		
        	bodyText =  "\n" + "BV=%0.2fV/BC=%0.2fmA/SV=%0.2fV/SC=%0.2fmA/%s" % (batteryVoltage, batteryCurrent, solarVoltage, solarCurrent,exposure)
 

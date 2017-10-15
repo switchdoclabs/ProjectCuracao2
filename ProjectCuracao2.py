@@ -1828,6 +1828,8 @@ print returnStatusLine("Check WLAN",config.enable_WLAN_Detection)
 print returnStatusLine("WeatherUnderground",config.WeatherUnderground_Present)
 print "----------------------"
 
+pclogging.log(pclogging.INFO, __name__, "ProjectCuracao2 Startup Version 3.0")
+
 # set initial power state
 
 powercontrol.initialPowerState()
@@ -1854,8 +1856,6 @@ loadPower=0
 batteryCharge=0
 
 
-
-pclogging.log(pclogging.INFO, __name__, "ProjectCuracao2 Startup Version 3.0")
 
 subjectText = "The ProjectCuracao2 Raspberry Pi has #rebooted."
 bodyText = "ProjectCuracao2 Version 3.0 Startup \n"
@@ -1924,7 +1924,7 @@ scheduler.add_job(WLAN_check, 'interval', seconds=30*60)
 scheduler.add_job(rebootPi, 'cron', day='2-30/2', hour=0, minute=4, args=["48 Hour Reboot"]) 
 	
 # send a picture an hour
-scheduler.add_job(Camera.takeAndSendPicture, 'cron', minute=3, second=10, args=["Hour Pic", pwm, 300, 550 ]) 
+scheduler.add_job(Camera.takeAndSendPicture, 'cron', minute=3, second=10, args=["Hour Pic", pwm, 200, 550 ]) 
 
 # every 1 minute, print out Power Status
 
