@@ -1,7 +1,7 @@
 #
 #
 # Project Curacao2 Solar Powered Weather Station
-# Version 3.0 March 2017 
+# Version 3.1 October 2017 
 #
 # SwitchDoc Labs
 # www.switchdoc.com
@@ -808,6 +808,7 @@ def readWXLink(block1, block2):
         					now = datetime.now().strftime('%H:%M:%S - %Y/%m/%d')
 						print "Wireless ID/Mess#=%d/%i\t %s SVer = %d BV=%6.2f SV=%6.2f SC=%6.2f" % (SensorID, MessageID, now, (block1[2] - block1[2]/10*10), WXLink_batteryVoltage, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent)
                 				print "********************"
+						writeSensorPower(SensorID, MessageID, WXLink_batteryVoltage, WXLink_batteryCurrent, WXLink_loadCurrent, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent)
 
                 		if (SensorID == 3):
 					if (config.WXLink_LastMessageID_3 != MessageID):
@@ -820,6 +821,7 @@ def readWXLink(block1, block2):
         					now = datetime.now().strftime('%H:%M:%S - %Y/%m/%d')
 						print "Wireless ID/Mess#=%d/%i\t %s SVer = %d BV=%6.2f SV=%6.2f SC=%6.2f" % (SensorID, MessageID, now, (block1[2] - block1[2]/10*10), WXLink_batteryVoltage, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent)
                 				print "********************"
+						writeSensorPower(SensorID, MessageID, WXLink_batteryVoltage, WXLink_batteryCurrent, WXLink_loadCurrent, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent)
 
 				
                 		
@@ -850,6 +852,43 @@ def readWXLink(block1, block2):
 		returnList.append(MessageID) 
 
 		return returnList
+
+
+# write out sensor states to database
+
+def writeSensorPower(SensorID, MessageID, WXLink_batteryVoltage, WXLink_batteryCurrent, WXLink_loadCurrent, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent):
+
+	print "Write out to database - Sensor Power"	
+       # now we have the data, stuff it in the database
+
+        try:
+                print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'ProjectCuracao2');
+
+                cur = con.cursor()
+                print "before query"
+
+		query = 'INSERT INTO SensorPower(TimeStamp, SensorID, MessageID, batteryVoltage, batteryCurrent, loadCurrent, solarVoltage, solarCurrent) VALUES(UTC_TIMESTAMP(), %i, %i, %.3f, %.3f, %.3f, %.3f, %.3f)' % (SensorID, MessageID, WXLink_batteryVoltage, WXLink_batteryCurrent, WXLink_loadCurrent, WXLink_solarPanelVoltage, WXLink_solarPanelCurrent)
+                print("query=%s" % query)
+
+                cur.execute(query)
+
+
+                con.commit()
+
+        except mdb.Error, e:
+
+                print "Error %d: %s" % (e.args[0],e.args[1])
+                con.rollback()
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
 
 # write SunAirPlus stats out to file
 def writeSunAirPlusStats():
@@ -1800,7 +1839,7 @@ def printPowerState():
 
 
 print  ""
-print "ProjectCuracao2 Solar Powered Environmental Station Version 3.0 - SwitchDoc Labs"
+print "ProjectCuracao2 Solar Powered Environmental Station Version 3.1 - SwitchDoc Labs"
 print ""
 print ""
 print "Program Started at:"+ time.strftime("%Y-%m-%d %H:%M:%S")
@@ -1828,7 +1867,7 @@ print returnStatusLine("Check WLAN",config.enable_WLAN_Detection)
 print returnStatusLine("WeatherUnderground",config.WeatherUnderground_Present)
 print "----------------------"
 
-pclogging.log(pclogging.INFO, __name__, "ProjectCuracao2 Startup Version 3.0")
+pclogging.log(pclogging.INFO, __name__, "ProjectCuracao2 Startup Version 3.1")
 
 # set initial power state
 
@@ -1858,7 +1897,7 @@ batteryCharge=0
 
 
 subjectText = "The ProjectCuracao2 Raspberry Pi has #rebooted."
-bodyText = "ProjectCuracao2 Version 3.0 Startup \n"
+bodyText = "ProjectCuracao2 Version 3.1 Startup \n"
 if (config.SunAirPlus_Present):
 	sampleSunAirPlus()
 	bodyText = bodyText + "\n" + "BV=%0.2fV/BC=%0.2fmA/SV=%0.2fV/SC=%0.2fmA" % (batteryVoltage, batteryCurrent, solarVoltage, solarCurrent)
